@@ -1,4 +1,4 @@
-module redis_cache
+module github.com/zhanglp0129/redis_cache
 
 go 1.22
 
