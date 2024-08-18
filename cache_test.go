@@ -77,9 +77,16 @@ func TestDeleteCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if n, err := rdb.Exists(context.Background(), key).Result(); err != nil || n > 0 {
 		t.Fatal("删除缓存失败")
 	}
 
+	// 删除不存在的缓存
+	err = DeleteCache(rdb, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n, err := rdb.Exists(context.Background(), key).Result(); err != nil || n > 0 {
+		t.Fatal("删除缓存失败")
+	}
 }
