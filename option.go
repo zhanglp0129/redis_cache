@@ -7,7 +7,7 @@ import (
 
 type Option func(c *CacheConfig)
 
-// WithCacheTime 指定缓存时间，默认为55-65秒；当再次访问缓存时，会刷新缓存时间
+// WithCacheTime 指定缓存时间，默认为29-31分钟
 func WithCacheTime(cacheTime time.Duration) Option {
 	return func(c *CacheConfig) {
 		c.cacheTime = cacheTime
@@ -18,5 +18,12 @@ func WithCacheTime(cacheTime time.Duration) Option {
 func WithContext(ctx context.Context) Option {
 	return func(c *CacheConfig) {
 		c.ctx = ctx
+	}
+}
+
+// WithFlushCacheTime 在命中缓存时刷新缓存时间，默认为false
+func WithFlushCacheTime(flush bool) Option {
+	return func(c *CacheConfig) {
+		c.flush = flush
 	}
 }

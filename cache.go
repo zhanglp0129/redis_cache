@@ -20,6 +20,7 @@ func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, quer
 	config := CacheConfig{
 		cacheTime: getDefaultCacheTime(),
 		ctx:       context.Background(),
+		flush:     false,
 	}
 	for _, opt := range options {
 		opt(&config)
@@ -35,7 +36,10 @@ func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, quer
 		}
 
 		// 刷新缓存时间
-		return true, rdb.Expire(config.ctx, key, config.cacheTime).Err()
+		if config.flush {
+			return true, rdb.Expire(config.ctx, key, config.cacheTime).Err()
+		}
+		return true, nil
 	} else if errors.Is(err, redis.Nil) {
 		// 未命中缓存
 		return false, cacheMiss(rdb, key, model, query, &config)
@@ -47,7 +51,7 @@ func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, quer
 
 // 获取默认缓存时间
 func getDefaultCacheTime() time.Duration {
-	return time.Duration(55+rand.Int()%11) * time.Second
+	return time.Duration(30+rand.Int()%3) * time.Minute
 }
 
 // 缓存未命中
