@@ -74,3 +74,8 @@ func cacheMiss[T any](rdb redis.UniversalClient, key string, model *T, query Que
 func DeleteCache(rdb redis.UniversalClient, key string) error {
 	return rdb.Del(context.Background(), key).Err()
 }
+
+// DeleteCacheToPipe 将删除缓存的操作加入pipe，不会执行
+func DeleteCacheToPipe(pipe redis.Pipeliner, keys ...string) {
+	pipe.Del(context.Background(), keys...)
+}
