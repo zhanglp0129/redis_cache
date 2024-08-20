@@ -27,3 +27,10 @@ func WithFlushCacheTime(flush bool) Option {
 		c.flush = flush
 	}
 }
+
+// WriteCache 是否在缓存未命中时，写入缓存，默认为true
+func WriteCache(write bool) Option {
+	return func(c *CacheConfig) {
+		c.write = write
+	}
+}

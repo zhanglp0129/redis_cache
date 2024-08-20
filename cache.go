@@ -21,6 +21,7 @@ func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, quer
 		cacheTime: getDefaultCacheTime(),
 		ctx:       context.Background(),
 		flush:     false,
+		write:     true,
 	}
 	for _, opt := range options {
 		opt(&config)
@@ -61,6 +62,11 @@ func cacheMiss[T any](rdb redis.UniversalClient, key string, model *T, query Que
 		return err
 	}
 	*model = *res
+
+	// 不写入缓存
+	if !config.write {
+		return nil
+	}
 
 	data, err := json.Marshal(model)
 	if err != nil {

@@ -9,4 +9,5 @@ type CacheConfig struct {
 	cacheTime time.Duration
 	ctx       context.Context
 	flush     bool
+	write     bool
 }
