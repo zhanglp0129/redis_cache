@@ -2,8 +2,21 @@ package redis_cache
 
 import (
 	"context"
+	"math/rand"
 	"time"
 )
+
+type CacheConfig struct {
+	cacheTime time.Duration
+	ctx       context.Context
+	flush     bool
+	write     bool
+}
+
+// 获取默认缓存时间，默认为29-31分钟
+func getDefaultCacheTime() time.Duration {
+	return 29*time.Minute + time.Duration(rand.Int63()%(2*int64(time.Minute)))
+}
 
 type Option func(c *CacheConfig)
 

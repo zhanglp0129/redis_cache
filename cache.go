@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/redis/go-redis/v9"
-	"math/rand"
-	"time"
 )
 
 type QueryFunc[T any] func() (T, error)
@@ -48,11 +46,6 @@ func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, quer
 
 	// 出现错误
 	return false, err
-}
-
-// 获取默认缓存时间
-func getDefaultCacheTime() time.Duration {
-	return time.Duration(30+rand.Int()%3) * time.Minute
 }
 
 // 缓存未命中
