@@ -7,6 +7,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const (
+	CacheIncrByLuaScript = `
+    if redis.call("EXISTS", KEYS[1]) == 1 then
+        return redis.call("INCRBY", KEYS[1], ARGV[1])
+    else
+        return 0
+    end
+    `
+)
+
 type QueryFunc[T any] func() (T, error)
 
 // QueryWithCache 带着缓存查询
@@ -76,7 +86,7 @@ func DeleteCache(rdb redis.UniversalClient, key string) error {
 
 // CacheIncrBy 如果只缓存了一个整数，可以修改缓存，让这个整数增加value
 func CacheIncrBy(rdb redis.UniversalClient, key string, value int64) error {
-	return rdb.IncrBy(context.Background(), key, value).Err()
+	return rdb.Eval(context.Background(), CacheIncrByLuaScript, []string{key}, value).Err()
 }
 
 // DeleteCacheToPipe 将删除缓存的操作加入pipe，不会执行
@@ -85,6 +95,6 @@ func DeleteCacheToPipe(pipe redis.Pipeliner, keys ...string) {
 }
 
 // CacheIncrByToPipe 将缓存的整数增加value。会把操作加入pipe，不会执行。一次只能添加一个
-func CacheIncrByToPipe(pipe redis.Pipeliner, key string, value int64) error {
-	return pipe.IncrBy(context.Background(), key, value).Err()
+func CacheIncrByToPipe(pipe redis.Pipeliner, key string, value int64) {
+	pipe.Eval(context.Background(), CacheIncrByLuaScript, []string{key}, value)
 }

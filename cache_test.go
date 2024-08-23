@@ -130,4 +130,28 @@ func TestCacheIncrBy(t *testing.T) {
 	if result != 15 {
 		t.Fatal("缓存错误")
 	}
+
+	// 删除缓存
+	err = DeleteCache(rdb, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 缓存+5
+	err = CacheIncrBy(rdb, key, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 再读取缓存，并判断是否命中
+	hit, err := QueryWithCache(rdb, key, &result, func() (*int64, error) {
+		var data int64 = 10
+		return &data, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hit || result != 10 {
+		t.Fatal("缓存错误")
+	}
 }
