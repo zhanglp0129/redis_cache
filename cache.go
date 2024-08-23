@@ -74,7 +74,17 @@ func DeleteCache(rdb redis.UniversalClient, key string) error {
 	return rdb.Del(context.Background(), key).Err()
 }
 
+// CacheIncrBy 如果只缓存了一个整数，可以修改缓存，让这个整数增加value
+func CacheIncrBy(rdb redis.UniversalClient, key string, value int64) error {
+	return rdb.IncrBy(context.Background(), key, value).Err()
+}
+
 // DeleteCacheToPipe 将删除缓存的操作加入pipe，不会执行
 func DeleteCacheToPipe(pipe redis.Pipeliner, keys ...string) {
 	pipe.Del(context.Background(), keys...)
+}
+
+// CacheIncrByToPipe 将缓存的整数增加value。会把操作加入pipe，不会执行。一次只能添加一个
+func CacheIncrByToPipe(pipe redis.Pipeliner, key string, value int64) error {
+	return pipe.IncrBy(context.Background(), key, value).Err()
 }

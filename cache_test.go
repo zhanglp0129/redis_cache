@@ -90,3 +90,44 @@ func TestDeleteCache(t *testing.T) {
 		t.Fatal("删除缓存失败")
 	}
 }
+
+func TestCacheIncrBy(t *testing.T) {
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+	})
+	key := "test_key"
+
+	// 删除缓存
+	err := DeleteCache(rdb, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 写入缓存，10
+	var result int64
+	_, err = QueryWithCache(rdb, key, &result, func() (*int64, error) {
+		var data int64 = 10
+		return &data, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 缓存+5
+	err = CacheIncrBy(rdb, key, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 再读取缓存，并判断是否为15
+	_, err = QueryWithCache(rdb, key, &result, func() (*int64, error) {
+		var data int64 = 10
+		return &data, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result != 15 {
+		t.Fatal("缓存错误")
+	}
+}
