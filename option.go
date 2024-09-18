@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+var (
+	// DefaultCacheTime 默认缓存时间，30min
+	DefaultCacheTime = 30 * time.Minute
+	// DefaultCacheTimeDiff 默认缓存时间的上下偏差，5min
+	DefaultCacheTimeDiff = 5 * time.Minute
+)
+
 type CacheConfig struct {
 	cacheTime time.Duration
 	ctx       context.Context
@@ -13,29 +20,30 @@ type CacheConfig struct {
 	write     bool
 }
 
-// 获取默认缓存时间，默认为29-31分钟
+// 获取默认缓存时间，默认为 [25, 35) min
 func getDefaultCacheTime() time.Duration {
-	return 29*time.Minute + time.Duration(rand.Int63()%(2*int64(time.Minute)))
+	diff := time.Duration(rand.Int63()%int64(2*DefaultCacheTimeDiff)) - DefaultCacheTimeDiff
+	return max(0, DefaultCacheTime+diff)
 }
 
 type Option func(c *CacheConfig)
 
-// WithCacheTime 指定缓存时间，默认为29-31分钟
+// WithCacheTime 指定缓存时间，默认为 [25, 35) min
 func WithCacheTime(cacheTime time.Duration) Option {
 	return func(c *CacheConfig) {
 		c.cacheTime = cacheTime
 	}
 }
 
-// WithContext 指定使用redis时的context
+// WithContext 指定使用redis时的context，默认为background
 func WithContext(ctx context.Context) Option {
 	return func(c *CacheConfig) {
 		c.ctx = ctx
 	}
 }
 
-// WithFlushCacheTime 在命中缓存时刷新缓存时间，默认为false
-func WithFlushCacheTime(flush bool) Option {
+// FlushCacheTime 在命中缓存时刷新缓存时间，默认为false
+func FlushCacheTime(flush bool) Option {
 	return func(c *CacheConfig) {
 		c.flush = flush
 	}
