@@ -16,7 +16,8 @@ type QueryFunc[T any] func() (T, error)
 func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, query QueryFunc[*T], options ...Option) (bool, error) {
 	// 获取缓存配置
 	config := CacheConfig{
-		cacheTime: getDefaultCacheTime(),
+		cacheTime: DefaultCacheTime,
+		diff:      DefaultCacheTimeDiff,
 		ctx:       context.Background(),
 		flush:     false,
 		write:     true,
@@ -36,7 +37,7 @@ func QueryWithCache[T any](rdb redis.UniversalClient, key string, model *T, quer
 
 		// 刷新缓存时间
 		if config.flush {
-			return true, rdb.Expire(config.ctx, key, config.cacheTime).Err()
+			return true, rdb.Expire(config.ctx, key, computeCacheTime(config.cacheTime, config.diff)).Err()
 		}
 		return true, nil
 	} else if errors.Is(err, redis.Nil) {
@@ -66,5 +67,5 @@ func cacheMiss[T any](rdb redis.UniversalClient, key string, model *T, query Que
 		return err
 	}
 
-	return rdb.SetEx(config.ctx, key, string(data), config.cacheTime).Err()
+	return rdb.SetEx(config.ctx, key, string(data), computeCacheTime(config.cacheTime, config.diff)).Err()
 }

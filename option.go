@@ -15,23 +15,30 @@ var (
 
 type CacheConfig struct {
 	cacheTime time.Duration
+	diff      time.Duration
 	ctx       context.Context
 	flush     bool
 	write     bool
 }
 
-// 获取默认缓存时间，默认为 [25, 35) min
-func getDefaultCacheTime() time.Duration {
-	diff := time.Duration(rand.Int63()%int64(2*DefaultCacheTimeDiff)) - DefaultCacheTimeDiff
-	return max(0, DefaultCacheTime+diff)
+// 计算缓存时间，默认为 [25, 35) min
+func computeCacheTime(cacheTime time.Duration, diff time.Duration) time.Duration {
+	return max(0, cacheTime+time.Duration(rand.Int63()%int64(2*diff))-diff)
 }
 
 type Option func(c *CacheConfig)
 
-// WithCacheTime 指定缓存时间，默认为 [25, 35) min
+// WithCacheTime 指定缓存时间，默认为 30 min
 func WithCacheTime(cacheTime time.Duration) Option {
 	return func(c *CacheConfig) {
 		c.cacheTime = cacheTime
+	}
+}
+
+// WithCacheTimeDiff 指定缓存时间上下偏差，默认为 5 min
+func WithCacheTimeDiff(diff time.Duration) Option {
+	return func(c *CacheConfig) {
+		c.diff = diff
 	}
 }
 
