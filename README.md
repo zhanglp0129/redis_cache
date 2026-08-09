@@ -1,10 +1,12 @@
+
+
 # RedisCache
 Golang使用redis缓存，将数据转换为json，并存入redis
 
 ## 使用
 1. 安装依赖
 ```shell
-go get -u github.com/zhanglp0129/redis_cache
+go get github.com/zhanglp0129/redis_cache
 ```
 
 2. 带着缓存查询
